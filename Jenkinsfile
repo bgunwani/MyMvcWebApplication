@@ -1,55 +1,25 @@
 pipeline {
     agent any
-    tools {
-        dotnet 'dotnet' // Ensure .NET SDK is installed and named in Jenkins
-    }
     stages {
-        stage('Clone Repository') {
+        stage('Restore') {
             steps {
-                checkout scm
+                sh 'dotnet restore MyMvcWebApplication.sln'
             }
         }
-        stage('Restore Dependencies') {
+        stage('Build') {
             steps {
-                echo 'Restoring dependencies...'
-                sh 'dotnet restore'
+                sh 'dotnet build MyMvcWebApplication.sln --configuration Release'
             }
         }
-        stage('Build Application') {
+        stage('Test') {
             steps {
-                echo 'Building the application...'
-                sh 'dotnet build --configuration Release'
+                sh 'dotnet test MyMvcWebApplication.sln --logger:trx'
             }
         }
-        stage('Run Unit Tests') {
+        stage('Publish') {
             steps {
-                echo 'Running unit tests...'
-                sh 'dotnet test --no-build --verbosity normal'
+                sh 'dotnet publish MyMvcWebApplication.sln --configuration Release --output ./publish'
             }
-        }
-        stage('Publish Application') {
-            steps {
-                echo 'Publishing the application...'
-                sh 'dotnet publish --configuration Release --output ./publish'
-            }
-        }
-        stage('Deploy Application') {
-            steps {
-                echo 'Deploying to target server...'
-                // Deployment logic (e.g., SCP, FTP, Azure CLI)
-                sh '''
-                    # Example for deploying to a Linux server
-                    scp -r ./publish user@server:/path/to/deploy
-                '''
-            }
-        }
-    }
-    post {
-        success {
-            echo 'Pipeline completed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed.'
         }
     }
 }
