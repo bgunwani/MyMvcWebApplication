@@ -1,24 +1,34 @@
 pipeline {
     agent any
+
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Restore') {
             steps {
-                sh 'dotnet restore MyMvcWebApplication.sln'
+                bat 'dotnet restore'
             }
         }
+
         stage('Build') {
             steps {
-                sh 'dotnet build MyMvcWebApplication.sln --configuration Release'
+                bat 'dotnet build --configuration Release'
             }
         }
+
         stage('Test') {
             steps {
-                sh 'dotnet test MyMvcWebApplication.sln --logger:trx'
+                bat 'dotnet test'
             }
         }
+
         stage('Publish') {
             steps {
-                sh 'dotnet publish MyMvcWebApplication.sln --configuration Release --output ./publish'
+                bat 'dotnet publish --configuration Release --output publish'
             }
         }
     }
